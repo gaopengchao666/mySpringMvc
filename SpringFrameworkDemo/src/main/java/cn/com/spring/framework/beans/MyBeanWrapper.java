@@ -11,4 +11,10 @@ public class MyBeanWrapper
 {
     private Object wrappedInstance;
     private Class<?> wrappedClass;
+
+    public MyBeanWrapper(Object instance)
+    {
+        this.wrappedInstance = instance;
+        this.wrappedClass = instance.getClass();
+    }
 }

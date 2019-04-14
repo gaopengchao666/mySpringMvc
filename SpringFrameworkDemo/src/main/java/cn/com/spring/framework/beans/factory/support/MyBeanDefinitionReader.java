@@ -1,5 +1,7 @@
 package cn.com.spring.framework.beans.factory.support;
 
+import cn.com.spring.framework.beans.config.MyBeanDefinition;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import cn.com.spring.framework.beans.config.MyBeanDefinition;
-
 /**
  * @author gaopengchao 2019年4月11日
  */
@@ -17,6 +17,7 @@ public class MyBeanDefinitionReader
 {
     private List<String> registyBeanClasses = new ArrayList<String>();
 
+    @lombok.Getter
     private Properties config = new Properties();
 
     private String[] locations;
