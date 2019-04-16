@@ -49,6 +49,7 @@ public class MyDispatcherServlet extends HttpServlet
         initStrategies(context);
     }
 
+
     /**
      * 初始化springmvc九大组件
      * @param context
@@ -176,13 +177,29 @@ public class MyDispatcherServlet extends HttpServlet
         processDispatchResult(req, resp, mv);
     }
 
-    private void processDispatchResult(HttpServletRequest req, HttpServletResponse resp, MyModelAndView mv) {
+    private void processDispatchResult(HttpServletRequest req, HttpServletResponse resp, MyModelAndView mv) throws Exception {
         //把给我的ModleAndView变成一个HTML、OuputStream、json、freemark、veolcity
         //ContextType
         if(null == mv){return;}
+
+        if(this.viewResolvers.isEmpty()){ return;}
+        if (this.viewResolvers != null) {
+            for (MyViewResolver viewResolver : this.viewResolvers) {
+                MyView view = viewResolver.resolveViewName(mv.getViewName(), null);
+                if (view != null) {
+                    view.render(mv.getModel(),req,resp);
+                    return;
+                }
+            }
+        }
     }
 
     private MyHandlerAdapter getHandlerAdapter(MyHandlerMapping handler) {
+        if(this.handlerAdapters.isEmpty()){return null;}
+        MyHandlerAdapter ha = this.handlerAdapters.get(handler);
+        if (ha.supports(handler)) {
+            return ha;
+        }
         return null;
     }
 
