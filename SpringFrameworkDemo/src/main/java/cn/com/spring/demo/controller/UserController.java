@@ -1,5 +1,6 @@
 package cn.com.spring.demo.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +41,12 @@ public class UserController
     @MyRequestMapping("/addUser")
     public void addUser(HttpServletRequest req,HttpServletResponse res,@MyRequestParam("name") String userName)
     {
-        throw new NullPointerException("故意报错");
+        userService.addUser(userName);
+    }
+    
+    @MyRequestMapping("/deleteUser")
+    public void deleteUser(HttpServletRequest req,HttpServletResponse res,@MyRequestParam("name") String userName) throws IOException
+    {
+        res.getOutputStream().write("删除方法".getBytes());
     }
 }

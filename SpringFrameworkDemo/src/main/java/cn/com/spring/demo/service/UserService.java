@@ -9,4 +9,9 @@ import cn.com.spring.demo.entity.User;
 public interface UserService
 {
     public User queryUser(String userName);
+
+    /**
+     * @param userName
+     */
+    public void addUser(String userName);
 }

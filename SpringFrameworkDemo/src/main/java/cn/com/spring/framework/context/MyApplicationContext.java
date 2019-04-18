@@ -1,8 +1,20 @@
 package cn.com.spring.framework.context;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+
 import cn.com.spring.framework.annotation.MyAutowired;
 import cn.com.spring.framework.annotation.MyController;
 import cn.com.spring.framework.annotation.MyService;
+import cn.com.spring.framework.aop.MyAopProxy;
+import cn.com.spring.framework.aop.MyCglibAopProxy;
+import cn.com.spring.framework.aop.MyJdkDynamicAopProxy;
+import cn.com.spring.framework.aop.config.MyAopConfig;
+import cn.com.spring.framework.aop.support.MyAdvisedSupport;
 import cn.com.spring.framework.beans.MyBeanWrapper;
 import cn.com.spring.framework.beans.config.MyBeanDefinition;
 import cn.com.spring.framework.beans.config.MyBeanPostProcessor;
@@ -10,13 +22,6 @@ import cn.com.spring.framework.beans.factory.support.MyBeanDefinitionReader;
 import cn.com.spring.framework.beans.factory.support.MyDefaultListableBeanFactory;
 import cn.com.spring.framework.core.MyBeanFactory;
 import lombok.Getter;
-
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author gaopengchao
@@ -77,7 +82,7 @@ public class MyApplicationContext extends MyDefaultListableBeanFactory implement
     @Override
     public Object getBean(Class<?> beanClass) throws Exception
     {
-        return null;
+        return getBean(beanClass.getName());
     }
 
     /**
@@ -122,6 +127,16 @@ public class MyApplicationContext extends MyDefaultListableBeanFactory implement
             }else {
                 Class<?> clazz = Class.forName(className);
                 instance = clazz.newInstance();
+                //注入aop的逻辑
+                MyAdvisedSupport config = instantionAopConfig(beanDefinition);
+                config.setTargetClass(clazz);
+                config.setTarget(instance);
+
+                //符合PointCut的规则的话，闯将代理对象
+                if(config.pointCutMatch()) {
+                    instance = createProxy(config).getProxy();
+                }
+                
                 //通过类名或者bean名称都可拿到单例
                 this.singletonBeanCacheMap.put(className,instance);
                 this.singletonBeanCacheMap.put(beanDefinition.getFactoryBeanName(),instance);
@@ -131,6 +146,30 @@ public class MyApplicationContext extends MyDefaultListableBeanFactory implement
         }
 
         return instance;
+    }
+    
+    /**
+     * 获取代理配置 返回
+     * @param gpBeanDefinition
+     * @return
+     */
+    private MyAdvisedSupport instantionAopConfig(MyBeanDefinition gpBeanDefinition) {
+        MyAopConfig config = new MyAopConfig();
+        config.setPointCut(this.reader.getConfig().getProperty("pointCut"));
+        config.setAspectClass(this.reader.getConfig().getProperty("aspectClass"));
+        config.setAspectBefore(this.reader.getConfig().getProperty("aspectBefore"));
+        config.setAspectAfter(this.reader.getConfig().getProperty("aspectAfter"));
+        config.setAspectAfterThrow(this.reader.getConfig().getProperty("aspectAfterThrow"));
+        config.setAspectAfterThrowingName(this.reader.getConfig().getProperty("aspectAfterThrowingName"));
+        return new MyAdvisedSupport(config);
+    }
+    
+    private MyAopProxy createProxy(MyAdvisedSupport config) {
+        Class<?> targetClass = config.getTargetClass();
+        if(targetClass.getInterfaces().length > 0){
+            return new MyJdkDynamicAopProxy(config);
+        }
+        return new MyCglibAopProxy(config);
     }
 
     /**

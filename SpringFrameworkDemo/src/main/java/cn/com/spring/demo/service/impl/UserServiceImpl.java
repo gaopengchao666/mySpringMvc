@@ -9,7 +9,7 @@ import cn.com.spring.framework.annotation.MyService;
  * 2019年3月25日
  */
 @MyService("userService")
-public class UserNameImpl implements UserService
+public class UserServiceImpl implements UserService
 {
     @Override
     public User queryUser(String userName)
@@ -21,4 +21,9 @@ public class UserNameImpl implements UserService
         return user;
     }
 
+    @Override
+    public void addUser(String userName)
+    {
+        throw new NullPointerException("故意报错");
+    }
 }
