@@ -7,4 +7,6 @@ package cn.com.spring.framework.core;
 public interface MyBeanFactory
 {
     public Object getBean(String beanName) throws Exception;
+    
+    public Object getBean(Class<?> beanClass) throws Exception;
 }

@@ -12,6 +12,9 @@ public class MyBeanWrapper
     private Object wrappedInstance;
     private Class<?> wrappedClass;
 
+    /**
+     * @param instance
+     */
     public MyBeanWrapper(Object instance)
     {
         this.wrappedInstance = instance;

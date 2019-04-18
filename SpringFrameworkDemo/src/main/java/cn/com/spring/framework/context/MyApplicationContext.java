@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -72,6 +73,12 @@ public class MyApplicationContext extends MyDefaultListableBeanFactory implement
         return this.beanWrapperMap.get(beanName).getWrappedInstance();
 
     }
+    
+    @Override
+    public Object getBean(Class<?> beanClass) throws Exception
+    {
+        return null;
+    }
 
     /**
      * 添加bean的依赖注入
@@ -80,7 +87,7 @@ public class MyApplicationContext extends MyDefaultListableBeanFactory implement
      */
     private void populateBean(String beanName, Object instance) {
         Class<?> clazz = instance.getClass();
-        if (! clazz.isAnnotationPresent(MyController.class) ||  ! clazz.isAnnotationPresent(MyService.class)){return;}
+        if (! clazz.isAnnotationPresent(MyController.class) && ! clazz.isAnnotationPresent(MyService.class)){return;}
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields)
         {
@@ -95,9 +102,9 @@ public class MyApplicationContext extends MyDefaultListableBeanFactory implement
             field.setAccessible(true);
             try {
                 //给字段赋值
-                field.set(instance,this.beanWrapperMap.get(name).getWrappedInstance());
-
-            } catch (IllegalAccessException e) {
+                Object bean = getBean(name);
+                field.set(instance,bean);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -166,12 +173,14 @@ public class MyApplicationContext extends MyDefaultListableBeanFactory implement
     private void doRegisterBeanDefinition(List<MyBeanDefinition> beanDefinitions) throws Exception
     {
         beanDefinitions.forEach(beanDefinition -> {
-            if (! super.beanDefinitionMap.containsKey(beanDefinition.getFactoryBeanName())) {
+            if (super.beanDefinitionMap.containsKey(beanDefinition.getFactoryBeanName())) {
                 throw new RuntimeException("the " + beanDefinition.getFactoryBeanName() + " is existes!!");
             }
             super.beanDefinitionMap.put(beanDefinition.getFactoryBeanName(), beanDefinition);
         });
     }
     
-    
+    public Properties getConfig(){
+        return this.reader.getConfig();
+    }
 }

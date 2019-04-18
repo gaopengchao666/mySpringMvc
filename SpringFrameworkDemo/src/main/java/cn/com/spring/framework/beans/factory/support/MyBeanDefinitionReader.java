@@ -1,7 +1,5 @@
 package cn.com.spring.framework.beans.factory.support;
 
-import cn.com.spring.framework.beans.config.MyBeanDefinition;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import cn.com.spring.framework.beans.config.MyBeanDefinition;
+import lombok.Getter;
+
 /**
  * @author gaopengchao 2019年4月11日
  */
@@ -17,10 +18,8 @@ public class MyBeanDefinitionReader
 {
     private List<String> registyBeanClasses = new ArrayList<String>();
 
-    @lombok.Getter
+    @Getter
     private Properties config = new Properties();
-
-    private String[] locations;
 
     /**
      * 构造函数 加载properties文件
@@ -29,8 +28,7 @@ public class MyBeanDefinitionReader
      */
     public MyBeanDefinitionReader(String... configLocations)
     {
-        InputStream resourceAsStream = this.getClass().getClassLoader()
-                .getResourceAsStream(locations[0].replace("classpath", ""));
+        InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(configLocations[0].replace("classpath:", ""));
         try
         {
             config.load(resourceAsStream);
@@ -63,7 +61,7 @@ public class MyBeanDefinitionReader
     private void doScanner(String scanPackage)
     {
         // 转换为文件路径，实际上就是把.替换为/就OK了
-        URL url = this.getClass().getClassLoader().getResource("/" + scanPackage.replaceAll("\\.", "/"));
+        URL url = this.getClass().getResource("/" + scanPackage.replaceAll("\\.", "/"));
         File classPath = new File(url.getFile());
         for (File file : classPath.listFiles())
         {
